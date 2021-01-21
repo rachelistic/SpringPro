@@ -53,51 +53,51 @@ public class Example {
 					element = driver.findElement(By.xpath("//*[@id='menu_1_0108010000']/a"));
 					js.executeScript("arguments[0].click();", element); //클릭
 					System.out.println(element);
-				
+					driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+					//아이프레임 들어가기
+					driver.switchTo().frame(driver.findElement(By.id("txppIframe")));
+					System.out.println("아이프레임 들어감");
+					
+					
+					Thread.sleep(2000); //2초 재움
+					element = driver.findElement(By.id("bsno"));
+					String biznum ="5048600471"; //여기다가 파라미터 넣어주기
+			        element.sendKeys(biznum);
+			        System.out.println("사업자 번호 타이핑 완료");
+					//System.out.println("세션프레임2 코드 보기" + driver.getPageSource());
+					
+			        
+					//제출 혹은 닫기 버튼
+					element = driver.findElement(By.id("trigger5"));
+					js.executeScript("arguments[0].click();", element);
+					System.out.println("아이프레임에서 제출 버튼");
+					driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS); //5초 재움
 					
 					while (true) {
 					try {
-						driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
-						//아이프레임 들어가기
-						driver.switchTo().frame(driver.findElement(By.id("txppIframe")));
-						System.out.println("아이프레임 들어감");
 						
-						
-						Thread.sleep(2000); //2초 재움
-						element = driver.findElement(By.id("bsno"));
-						String biznum ="5048600471"; //여기다가 파라미터 넣어주기
-				        element.sendKeys(biznum);
-				        System.out.println("사업자 번호 타이핑 완료");
-						//System.out.println("세션프레임2 코드 보기" + driver.getPageSource());
-						
-				        
-						//제출 혹은 닫기 버튼
-						element = driver.findElement(By.id("trigger5"));
-						js.executeScript("arguments[0].click();", element);
-						System.out.println("아이프레임에서 제출 버튼");
-						driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS); //5초 재움
+					
 						
 						//
 						element = driver.findElement(By.xpath("//*[@id='grid2_cell_0_1']/nobr"));
 						
 						bizResult = URLDecoder.decode(element.getText(),"UTF-8");
-						System.out.println(bizResult);
-						//결과값 출력 
-						if( element != null  ) {
-					            System.out.println(bizResult);            
-					        }
+						System.out.println(bizResult + "1");
 						
-						//
 						//driver.switchTo().defaultContent();
 						//System.out.println("디폴트로 돌아옴");
 						
-						
-					//	return bizResult;
+						break;
+					
 					}catch (Throwable e) { 
 						e.printStackTrace();
 						System.out.println("아이프레임 못들어감");
-				        element= driver.findElement(By.id("trigger5"));
-						System.out.println("입력 실패");
+						element = driver.findElement(By.xpath("//*[@id='grid2_cell_0_1']/nobr"));
+						
+						bizResult = URLDecoder.decode(element.getText(),"UTF-8");
+						System.out.println(bizResult);
+						
+				       	System.out.println("입력 실패");
 						e.printStackTrace();
 						break;
 						}
@@ -122,13 +122,22 @@ public class Example {
 			
 			System.out.println("끝 10초 뒤 종료합니다.");
 			driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-		
+			driver.close();
 			
 			
 		}
 		
-		System.out.println(bizResult);
-		return bizResult;
+		if(bizResult.equals("국세청에 등록되지 않은 사업자등록번호입니다.	")) {
+			bizResult="NonRegBiz";
+		}else if(bizResult.equals("부가가치세 일반과세자 입니다.")) {
+			bizResult="RegBiz";
+		}else if(bizResult.equals("부가가치세 면세사업자 입니다.")) {
+			bizResult="RegBiz";
+		}else {
+			bizResult="closedBiz";
+		}
+		
+				return bizResult;
 
 	}
 	
